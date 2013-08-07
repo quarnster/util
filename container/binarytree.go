@@ -23,6 +23,7 @@ func (n *Node) find(data interface{}, cmp Compare, child int, parent *Node) (rch
 	if n.Data == nil {
 		return child, parent, n
 	}
+
 	switch c := cmp(data, n.Data); c {
 	case Equal:
 		return child, parent, n
@@ -83,8 +84,12 @@ func (n *Node) delete(child int, parent *Node) {
 	}
 }
 
+func (t *Tree) Find(data interface{}) (child int, parent, node *Node) {
+	return t.Root.Find(data, t.Compare)
+}
+
 func (t *Tree) Add(data interface{}) {
-	child, p, n := t.Root.Find(data, t.Compare)
+	child, p, n := t.Find(data)
 	if n != nil {
 		n.Data = data
 	} else if p.Data != nil {
@@ -95,7 +100,7 @@ func (t *Tree) Add(data interface{}) {
 }
 
 func (t *Tree) Delete(data interface{}) {
-	child, p, n := t.Root.Find(data, t.Compare)
+	child, p, n := t.Find(data)
 	if n == nil {
 		panic("Unable to find that node")
 	} else {
