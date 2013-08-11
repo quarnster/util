@@ -71,15 +71,20 @@ func (n *Node) delete(child int, parent *Node) {
 		}
 	case a == nil && b != nil:
 		*n = *b
-	case a != nil && b != nil:
+	case a != nil && b == nil:
 		*n = *a
 	default:
-		if ac := a.Children[1]; ac != nil {
-			n.Data = ac.Data
-			ac.delete(1, a)
-		} else if bc := b.Children[0]; bc != nil {
-			n.Data = bc.Data
-			bc.delete(0, b)
+		n2 := b
+		p2 := n
+		for n2.Children[0] != nil {
+			p2 = n2
+			n2 = n2.Children[0]
+		}
+		n.Data = n2.Data
+		if n2 == b {
+			b.delete(1, n)
+		} else {
+			n2.delete(0, p2)
 		}
 	}
 }
