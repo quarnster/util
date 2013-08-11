@@ -166,11 +166,14 @@ func TestBinaryTreeAddDelete(t *testing.T) {
 			tree.Add(j)
 		}
 		for k := 0; k < 10; k++ {
-			for j := 0; j < sub; j++ {
-				tree.Delete(j)
+			list = rand.Perm(sub)
+			a := rand.Intn(count - sub)
+			for _, j := range list {
+				tree.Delete(a + j)
 			}
-			for j := 0; j < sub; j++ {
-				tree.Add(j)
+			list = rand.Perm(sub)
+			for _, j := range list {
+				tree.Add(a + j)
 			}
 		}
 
