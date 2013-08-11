@@ -62,9 +62,12 @@ func TestBinaryTreeFind(t *testing.T) {
 		for _, j := range list {
 			if _, _, n := tree.Find(j); n == nil {
 				t.Errorf("Should have found %d, but didn't", j)
+			} else if v, ok := n.Data.(int); !ok {
+				t.Errorf("Unable to cast data to int... %+v", n.Data)
+			} else if v != j {
+				t.Errorf("Expected to find %d, but got %d", j, v)
 			}
 		}
-
 	}
 }
 
