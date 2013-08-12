@@ -1,3 +1,8 @@
+// The binary package implements code aiding in dealing with binary data.
+// The goal is to have users write as little custom binary parsing code as
+// possible by focusing instead on defining the data structures in terms of
+// Go structs and providing struct tags to guide the loading and saving of
+// the binary data.
 package binary
 
 import (
@@ -11,14 +16,31 @@ import (
 )
 
 type (
+	// If a data type being loaded implements the validateable interface,
+	// the Validate function will be called once the BinaryReader has
+	// finished reading the interface, and the error if any returned from
+	// this function will be what is returned from the BinaryReader's
+	// ReadInterface method.
 	Validateable interface {
 		Validate() error
 	}
 
+	// The Reader interface gives the user a chance to perform custom
+	// actions required to load specific data types.
 	Reader interface {
 		Read(*BinaryReader) error
 	}
 
+	// The BinaryReader uses information provided in struct tags to deal with
+	// operations common when reading data from a binary file into a Go struct,
+	// such as data alignment, array lengths, "if" checks and skipping of
+	// uninteresting data.
+	//
+	// In many instances this means that no custom loading code needs to be written
+	// and the user can focus on describing the data structures instead.
+	//
+	// For more complex needs, the Reader interface can be implemented which then
+	// allows the user to write custom loading code only where it is needed.
 	BinaryReader struct {
 		Reader    io.ReadSeeker
 		Endianess sb.ByteOrder
