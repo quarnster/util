@@ -22,7 +22,9 @@ func TestBinaryTree(t *testing.T) {
 		}}
 		list := rand.Perm(count)
 		for _, j := range list {
-			tree.Add(j)
+			if e := tree.Add(j); e != nil {
+				t.Error(e)
+			}
 		}
 
 		ch := make(chan interface{})
@@ -56,7 +58,9 @@ func TestBinaryTreeFind(t *testing.T) {
 		}}
 		list := rand.Perm(count)
 		for _, j := range list {
-			tree.Add(j)
+			if e := tree.Add(j); e != nil {
+				t.Error(e)
+			}
 		}
 		list = rand.Perm(count)
 		for _, j := range list {
@@ -89,10 +93,14 @@ func TestBinaryTreeDelete(t *testing.T) {
 		}}
 		list := rand.Perm(count)
 		for _, j := range list {
-			tree.Add(j)
+			if e := tree.Add(j); e != nil {
+				t.Error(e)
+			}
 		}
 		for j := 0; j < sub; j++ {
-			tree.Delete(j)
+			if e := tree.Delete(j); e != nil {
+				t.Error(e)
+			}
 		}
 
 		ch := make(chan interface{})
@@ -127,11 +135,15 @@ func TestBinaryTreeDelete2(t *testing.T) {
 		}}
 		list := rand.Perm(count)
 		for _, j := range list {
-			tree.Add(j)
+			if e := tree.Add(j); e != nil {
+				t.Error(e)
+			}
 		}
 		list = rand.Perm(sub)
 		for _, j := range list {
-			tree.Delete(j)
+			if e := tree.Delete(j); e != nil {
+				t.Error(e)
+			}
 		}
 
 		ch := make(chan interface{})
@@ -166,17 +178,23 @@ func TestBinaryTreeAddDelete(t *testing.T) {
 		}}
 		list := rand.Perm(count)
 		for _, j := range list {
-			tree.Add(j)
+			if e := tree.Add(j); e != nil {
+				t.Error(e)
+			}
 		}
 		for k := 0; k < 10; k++ {
 			list = rand.Perm(sub)
 			a := rand.Intn(count - sub)
 			for _, j := range list {
-				tree.Delete(a + j)
+				if e := tree.Delete(a + j); e != nil {
+					t.Error(e)
+				}
 			}
 			list = rand.Perm(sub)
 			for _, j := range list {
-				tree.Add(a + j)
+				if e := tree.Add(a + j); e != nil {
+					t.Error(e)
+				}
 			}
 		}
 

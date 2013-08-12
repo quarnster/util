@@ -1,5 +1,7 @@
 package container
 
+import "fmt"
+
 const (
 	Less ComparisonResult = iota
 	Equal
@@ -93,22 +95,28 @@ func (t *Tree) Find(data interface{}) (child int, parent, node *Node) {
 	return t.Root.Find(data, t.Compare)
 }
 
-func (t *Tree) Add(data interface{}) {
+func (t *Tree) Add(data interface{}) error {
 	child, p, n := t.Find(data)
 	if n != nil {
-		n.Data = data
+		if n.Data == data {
+			return fmt.Errorf("Data already exists in the tree")
+		} else {
+			n.Data = data
+		}
 	} else if p.Data != nil {
 		p.Children[child] = &Node{Data: data}
 	} else {
 		panic("Both parent and child was null")
 	}
+	return nil
 }
 
-func (t *Tree) Delete(data interface{}) {
+func (t *Tree) Delete(data interface{}) error {
 	child, p, n := t.Find(data)
 	if n == nil {
-		panic("Unable to find that node")
+		return fmt.Errorf("Unable to find that node")
 	} else {
 		n.delete(child, p)
+		return nil
 	}
 }
