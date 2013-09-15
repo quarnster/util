@@ -122,6 +122,12 @@ func (r *BinaryReader) ReadInterface(v interface{}) error {
 		} else {
 			v2.SetFloat(f)
 		}
+	case reflect.Array:
+		for i := 0; i < v2.Len(); i++ {
+			if err := r.ReadInterface(v2.Index(i).Addr().Interface()); err != nil {
+				return err
+			}
+		}
 	case reflect.Struct:
 		for i := 0; i < v2.NumField(); i++ {
 			var (
@@ -245,12 +251,6 @@ func (r *BinaryReader) ReadInterface(v interface{}) error {
 						}
 					}
 					f.Set(v3)
-				}
-			case reflect.Array:
-				for i := 0; i < f.Type().Len(); i++ {
-					if err = r.ReadInterface(f.Index(i).Addr().Interface()); err != nil {
-						return err
-					}
 				}
 			default:
 				if err := r.ReadInterface(f.Addr().Interface()); err != nil {
