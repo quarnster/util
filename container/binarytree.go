@@ -113,7 +113,7 @@ func (t *Tree) Add(data interface{}) error {
 
 func (t *Tree) Delete(data interface{}) error {
 	child, p, n := t.Find(data)
-	if n == nil {
+	if n == nil || (p == nil && n.Data == nil) {
 		return fmt.Errorf("Unable to find that node")
 	} else {
 		n.delete(child, p)

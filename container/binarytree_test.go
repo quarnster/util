@@ -211,3 +211,27 @@ func TestBinaryTreeAddDelete(t *testing.T) {
 		}
 	}
 }
+
+func TestBinaryTreeAddDelete2(t *testing.T) {
+	tree := Tree{Compare: func(a, b interface{}) ComparisonResult {
+		aa := a.(int)
+		bb := b.(int)
+		switch {
+		case aa < bb:
+			return Less
+		case aa > bb:
+			return Greater
+		default:
+			return Equal
+		}
+	}}
+	if err := tree.Add(1); err != nil {
+		t.Error(err)
+	} else if err := tree.Add(1); err == nil {
+		t.Error("Expected an error, but didn't get one")
+	} else if err := tree.Delete(1); err != nil {
+		t.Error(err)
+	} else if err := tree.Delete(1); err == nil {
+		t.Error("Expected an error, but didn't get one")
+	}
+}
