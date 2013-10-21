@@ -5,11 +5,12 @@ package expression
 
 import (
 	. "github.com/quarnster/parser"
+	"github.com/quarnster/util/text"
 )
 
 type EXPRESSION struct {
-	ParserData Reader
-	IgnoreRange Range
+	ParserData  Reader
+	IgnoreRange text.Region
 	Root        Node
 	LastError   int
 }
@@ -21,7 +22,7 @@ func (p *EXPRESSION) RootNode() *Node {
 func (p *EXPRESSION) SetData(data string) {
 	p.ParserData = NewReader(data)
 	p.Root = Node{Name: "EXPRESSION", P: p}
-	p.IgnoreRange = Range{}
+	p.IgnoreRange = text.Region{}
 	p.LastError = 0
 }
 
@@ -88,10 +89,10 @@ func (p *EXPRESSION) Expression() bool {
 		}
 	}
 	if accept && start != p.ParserData.Pos() {
-		if start < p.IgnoreRange.Start || p.IgnoreRange.Start == 0 {
-			p.IgnoreRange.Start = start
+		if start < p.IgnoreRange.A || p.IgnoreRange.A == 0 {
+			p.IgnoreRange.A = start
 		}
-		p.IgnoreRange.End = p.ParserData.Pos()
+		p.IgnoreRange.B = p.ParserData.Pos()
 	}
 	return accept
 }
@@ -132,10 +133,10 @@ func (p *EXPRESSION) Op() bool {
 		}
 	}
 	if accept && start != p.ParserData.Pos() {
-		if start < p.IgnoreRange.Start || p.IgnoreRange.Start == 0 {
-			p.IgnoreRange.Start = start
+		if start < p.IgnoreRange.A || p.IgnoreRange.A == 0 {
+			p.IgnoreRange.A = start
 		}
-		p.IgnoreRange.End = p.ParserData.Pos()
+		p.IgnoreRange.B = p.ParserData.Pos()
 	}
 	return accept
 }
@@ -167,10 +168,10 @@ func (p *EXPRESSION) BooleanOp() bool {
 		}
 	}
 	if accept && start != p.ParserData.Pos() {
-		if start < p.IgnoreRange.Start || p.IgnoreRange.Start == 0 {
-			p.IgnoreRange.Start = start
+		if start < p.IgnoreRange.A || p.IgnoreRange.A == 0 {
+			p.IgnoreRange.A = start
 		}
-		p.IgnoreRange.End = p.ParserData.Pos()
+		p.IgnoreRange.B = p.ParserData.Pos()
 	}
 	return accept
 }
@@ -210,13 +211,13 @@ func (p *EXPRESSION) ShiftRight() bool {
 		node := p.Root.Cleanup(start, end)
 		node.Name = "ShiftRight"
 		node.P = p
-		node.Range.Clip(p.IgnoreRange)
+		node.Range = node.Range.Clip(p.IgnoreRange)
 		p.Root.Append(node)
 	} else {
 		p.Root.Discard(start)
 	}
-	if p.IgnoreRange.Start >= end || p.IgnoreRange.End <= start {
-		p.IgnoreRange = Range{}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
 	}
 	return accept
 }
@@ -256,13 +257,13 @@ func (p *EXPRESSION) ShiftLeft() bool {
 		node := p.Root.Cleanup(start, end)
 		node.Name = "ShiftLeft"
 		node.P = p
-		node.Range.Clip(p.IgnoreRange)
+		node.Range = node.Range.Clip(p.IgnoreRange)
 		p.Root.Append(node)
 	} else {
 		p.Root.Discard(start)
 	}
-	if p.IgnoreRange.Start >= end || p.IgnoreRange.End <= start {
-		p.IgnoreRange = Range{}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
 	}
 	return accept
 }
@@ -300,13 +301,13 @@ func (p *EXPRESSION) Mask() bool {
 		node := p.Root.Cleanup(start, end)
 		node.Name = "Mask"
 		node.P = p
-		node.Range.Clip(p.IgnoreRange)
+		node.Range = node.Range.Clip(p.IgnoreRange)
 		p.Root.Append(node)
 	} else {
 		p.Root.Discard(start)
 	}
-	if p.IgnoreRange.Start >= end || p.IgnoreRange.End <= start {
-		p.IgnoreRange = Range{}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
 	}
 	return accept
 }
@@ -344,13 +345,13 @@ func (p *EXPRESSION) Add() bool {
 		node := p.Root.Cleanup(start, end)
 		node.Name = "Add"
 		node.P = p
-		node.Range.Clip(p.IgnoreRange)
+		node.Range = node.Range.Clip(p.IgnoreRange)
 		p.Root.Append(node)
 	} else {
 		p.Root.Discard(start)
 	}
-	if p.IgnoreRange.Start >= end || p.IgnoreRange.End <= start {
-		p.IgnoreRange = Range{}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
 	}
 	return accept
 }
@@ -388,13 +389,13 @@ func (p *EXPRESSION) Sub() bool {
 		node := p.Root.Cleanup(start, end)
 		node.Name = "Sub"
 		node.P = p
-		node.Range.Clip(p.IgnoreRange)
+		node.Range = node.Range.Clip(p.IgnoreRange)
 		p.Root.Append(node)
 	} else {
 		p.Root.Discard(start)
 	}
-	if p.IgnoreRange.Start >= end || p.IgnoreRange.End <= start {
-		p.IgnoreRange = Range{}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
 	}
 	return accept
 }
@@ -432,13 +433,13 @@ func (p *EXPRESSION) Mul() bool {
 		node := p.Root.Cleanup(start, end)
 		node.Name = "Mul"
 		node.P = p
-		node.Range.Clip(p.IgnoreRange)
+		node.Range = node.Range.Clip(p.IgnoreRange)
 		p.Root.Append(node)
 	} else {
 		p.Root.Discard(start)
 	}
-	if p.IgnoreRange.Start >= end || p.IgnoreRange.End <= start {
-		p.IgnoreRange = Range{}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
 	}
 	return accept
 }
@@ -478,13 +479,13 @@ func (p *EXPRESSION) AndNot() bool {
 		node := p.Root.Cleanup(start, end)
 		node.Name = "AndNot"
 		node.P = p
-		node.Range.Clip(p.IgnoreRange)
+		node.Range = node.Range.Clip(p.IgnoreRange)
 		p.Root.Append(node)
 	} else {
 		p.Root.Discard(start)
 	}
-	if p.IgnoreRange.Start >= end || p.IgnoreRange.End <= start {
-		p.IgnoreRange = Range{}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
 	}
 	return accept
 }
@@ -524,13 +525,13 @@ func (p *EXPRESSION) Eq() bool {
 		node := p.Root.Cleanup(start, end)
 		node.Name = "Eq"
 		node.P = p
-		node.Range.Clip(p.IgnoreRange)
+		node.Range = node.Range.Clip(p.IgnoreRange)
 		p.Root.Append(node)
 	} else {
 		p.Root.Discard(start)
 	}
-	if p.IgnoreRange.Start >= end || p.IgnoreRange.End <= start {
-		p.IgnoreRange = Range{}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
 	}
 	return accept
 }
@@ -568,13 +569,13 @@ func (p *EXPRESSION) Lt() bool {
 		node := p.Root.Cleanup(start, end)
 		node.Name = "Lt"
 		node.P = p
-		node.Range.Clip(p.IgnoreRange)
+		node.Range = node.Range.Clip(p.IgnoreRange)
 		p.Root.Append(node)
 	} else {
 		p.Root.Discard(start)
 	}
-	if p.IgnoreRange.Start >= end || p.IgnoreRange.End <= start {
-		p.IgnoreRange = Range{}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
 	}
 	return accept
 }
@@ -614,13 +615,13 @@ func (p *EXPRESSION) Le() bool {
 		node := p.Root.Cleanup(start, end)
 		node.Name = "Le"
 		node.P = p
-		node.Range.Clip(p.IgnoreRange)
+		node.Range = node.Range.Clip(p.IgnoreRange)
 		p.Root.Append(node)
 	} else {
 		p.Root.Discard(start)
 	}
-	if p.IgnoreRange.Start >= end || p.IgnoreRange.End <= start {
-		p.IgnoreRange = Range{}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
 	}
 	return accept
 }
@@ -658,13 +659,13 @@ func (p *EXPRESSION) Gt() bool {
 		node := p.Root.Cleanup(start, end)
 		node.Name = "Gt"
 		node.P = p
-		node.Range.Clip(p.IgnoreRange)
+		node.Range = node.Range.Clip(p.IgnoreRange)
 		p.Root.Append(node)
 	} else {
 		p.Root.Discard(start)
 	}
-	if p.IgnoreRange.Start >= end || p.IgnoreRange.End <= start {
-		p.IgnoreRange = Range{}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
 	}
 	return accept
 }
@@ -704,13 +705,13 @@ func (p *EXPRESSION) Ge() bool {
 		node := p.Root.Cleanup(start, end)
 		node.Name = "Ge"
 		node.P = p
-		node.Range.Clip(p.IgnoreRange)
+		node.Range = node.Range.Clip(p.IgnoreRange)
 		p.Root.Append(node)
 	} else {
 		p.Root.Discard(start)
 	}
-	if p.IgnoreRange.Start >= end || p.IgnoreRange.End <= start {
-		p.IgnoreRange = Range{}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
 	}
 	return accept
 }
@@ -782,10 +783,10 @@ func (p *EXPRESSION) Grouping() bool {
 		}
 	}
 	if accept && start != p.ParserData.Pos() {
-		if start < p.IgnoreRange.Start || p.IgnoreRange.Start == 0 {
-			p.IgnoreRange.Start = start
+		if start < p.IgnoreRange.A || p.IgnoreRange.A == 0 {
+			p.IgnoreRange.A = start
 		}
-		p.IgnoreRange.End = p.ParserData.Pos()
+		p.IgnoreRange.B = p.ParserData.Pos()
 	}
 	return accept
 }
@@ -870,13 +871,13 @@ func (p *EXPRESSION) Identifier() bool {
 		node := p.Root.Cleanup(start, end)
 		node.Name = "Identifier"
 		node.P = p
-		node.Range.Clip(p.IgnoreRange)
+		node.Range = node.Range.Clip(p.IgnoreRange)
 		p.Root.Append(node)
 	} else {
 		p.Root.Discard(start)
 	}
-	if p.IgnoreRange.Start >= end || p.IgnoreRange.End <= start {
-		p.IgnoreRange = Range{}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
 	}
 	return accept
 }
@@ -1022,13 +1023,13 @@ func (p *EXPRESSION) Constant() bool {
 		node := p.Root.Cleanup(start, end)
 		node.Name = "Constant"
 		node.P = p
-		node.Range.Clip(p.IgnoreRange)
+		node.Range = node.Range.Clip(p.IgnoreRange)
 		p.Root.Append(node)
 	} else {
 		p.Root.Discard(start)
 	}
-	if p.IgnoreRange.Start >= end || p.IgnoreRange.End <= start {
-		p.IgnoreRange = Range{}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
 	}
 	return accept
 }
@@ -1067,10 +1068,10 @@ func (p *EXPRESSION) Spacing() bool {
 		}
 	}
 	if accept && start != p.ParserData.Pos() {
-		if start < p.IgnoreRange.Start || p.IgnoreRange.Start == 0 {
-			p.IgnoreRange.Start = start
+		if start < p.IgnoreRange.A || p.IgnoreRange.A == 0 {
+			p.IgnoreRange.A = start
 		}
-		p.IgnoreRange.End = p.ParserData.Pos()
+		p.IgnoreRange.B = p.ParserData.Pos()
 	}
 	return accept
 }
@@ -1095,13 +1096,13 @@ func (p *EXPRESSION) EndOfFile() bool {
 		node := p.Root.Cleanup(start, end)
 		node.Name = "EndOfFile"
 		node.P = p
-		node.Range.Clip(p.IgnoreRange)
+		node.Range = node.Range.Clip(p.IgnoreRange)
 		p.Root.Append(node)
 	} else {
 		p.Root.Discard(start)
 	}
-	if p.IgnoreRange.Start >= end || p.IgnoreRange.End <= start {
-		p.IgnoreRange = Range{}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
 	}
 	return accept
 }
