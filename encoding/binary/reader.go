@@ -62,6 +62,12 @@ func (r *BinaryReader) ReadInterface(v interface{}) error {
 	}
 	v2 := t.Elem()
 	switch v2.Kind() {
+	case reflect.Uint:
+		if d, err := r.Uint64(); err != nil {
+			return err
+		} else {
+			v2.SetUint(uint64(d))
+		}
 	case reflect.Uint64:
 		if d, err := r.Uint64(); err != nil {
 			return err
@@ -85,6 +91,12 @@ func (r *BinaryReader) ReadInterface(v interface{}) error {
 			return err
 		} else {
 			v2.SetUint(uint64(d))
+		}
+	case reflect.Int:
+		if d, err := r.Int64(); err != nil {
+			return err
+		} else {
+			v2.SetInt(int64(d))
 		}
 	case reflect.Int64:
 		if d, err := r.Int64(); err != nil {
