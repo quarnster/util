@@ -140,6 +140,12 @@ func (r *BinaryReader) ReadInterface(v interface{}) error {
 				return err
 			}
 		}
+	case reflect.Slice:
+		for i := 0; i < v2.Len(); i++ {
+			if err := r.ReadInterface(v2.Index(i).Addr().Interface()); err != nil {
+				return err
+			}
+		}
 	case reflect.Struct:
 		for i := 0; i < v2.NumField(); i++ {
 			var (
