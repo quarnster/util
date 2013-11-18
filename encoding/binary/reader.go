@@ -62,6 +62,12 @@ func (r *BinaryReader) ReadInterface(v interface{}) error {
 	}
 	v2 := t.Elem()
 	switch v2.Kind() {
+	case reflect.Bool:
+		if d, err := r.Uint8(); err != nil {
+			return err
+		} else {
+			v2.SetBool(bool(d != 0))
+		}
 	case reflect.Uint:
 		if d, err := r.Uint64(); err != nil {
 			return err
@@ -146,6 +152,20 @@ func (r *BinaryReader) ReadInterface(v interface{}) error {
 				return err
 			}
 		}
+	case reflect.String:
+		var data []byte
+		var max = math.MaxInt32
+
+		for i := 0; i < max; i++ {
+			if u, err := r.Uint8(); err != nil {
+				return err
+			} else if u == '\u0000' {
+				break
+			} else {
+				data = append(data, u)
+			}
+		}
+		v2.SetString(string(data))
 	case reflect.Struct:
 		for i := 0; i < v2.NumField(); i++ {
 			var (
