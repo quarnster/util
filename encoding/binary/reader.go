@@ -1,3 +1,7 @@
+// Copyright 2013 Fredrik Ehnbom
+// Use of this source code is governed by a 2-clause
+// BSD-style license that can be found in the LICENSE file.
+
 // The binary package implements code aiding in dealing with binary data.
 // The goal is to have users write as little custom binary parsing code as
 // possible by focusing instead on defining the data structures in terms of

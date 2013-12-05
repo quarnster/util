@@ -1,3 +1,7 @@
+// Copyright 2013 Fredrik Ehnbom
+// Use of this source code is governed by a 2-clause
+// BSD-style license that can be found in the LICENSE file.
+
 // This file was generated with the following command:
 // ["pegparser", "-peg=encoding/binary/expression/expression.peg", "-notest", "-ignore=Spacing,Primary,Op,Expression,Grouping,BooleanOp", "-testfile=", "-outpath", "encoding/binary/expression/"]
 
