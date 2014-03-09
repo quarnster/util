@@ -175,11 +175,17 @@ func (o *Observatory) Connect(source, target interface{}) {
 }
 
 func (o *Observatory) Update() {
-	for k, p := range o.pollers {
-		if nv := p.get(); nv != p.current {
-			p.current = nv
-			o.pollers[k] = p
-			p.NotifyObservers()
+	redo := true
+	const maxLoops = 1000
+	for i := 0; i < maxLoops && redo; i++ {
+		redo = false
+		for k, p := range o.pollers {
+			if nv := p.get(); nv != p.current {
+				p.current = nv
+				o.pollers[k] = p
+				p.NotifyObservers()
+				redo = true
+			}
 		}
 	}
 }

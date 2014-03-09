@@ -5,6 +5,7 @@
 package util
 
 import (
+	"math/rand"
 	"testing"
 )
 
@@ -142,4 +143,38 @@ func TestObseratory5(t *testing.T) {
 	if a != 99 || b != 3 {
 		t.Errorf("%v, %v", a, b)
 	}
+}
+
+func TestObseratory6(t *testing.T) {
+	var (
+		values = make([]int, 100)
+		o      Observatory
+	)
+	conn := rand.Perm(len(values))
+	for i := 0; i < len(values)-1; i++ {
+		a, b := conn[i], conn[i+1]
+		o.Connect(&values[a], &values[b])
+	}
+	values[conn[0]] = 1
+	o.Update()
+	for _, v := range values {
+		if v != 1 {
+			t.Errorf("expected 1 not %d", v)
+		}
+	}
+	halfway := len(values) / 2
+	values[conn[halfway]] = 2
+	o.Update()
+
+	for i, v := range conn {
+		v = values[v]
+		exp := 1
+		if i >= halfway {
+			exp = 2
+		}
+		if v != exp {
+			t.Errorf("expected %d not %d", exp, v)
+		}
+	}
+
 }
