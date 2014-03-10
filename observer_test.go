@@ -147,8 +147,11 @@ func TestObseratory5(t *testing.T) {
 
 func TestObseratory6(t *testing.T) {
 	var (
-		values = make([]int, 100)
-		o      Observatory
+		values    = make([]int, 100)
+		halfway   = len(values) / 2
+		o         Observatory
+		obsCount1 int
+		obsCount2 int
 	)
 	conn := rand.Perm(len(values))
 	for i := 0; i < len(values)-1; i++ {
@@ -156,13 +159,16 @@ func TestObseratory6(t *testing.T) {
 		o.Connect(&values[a], &values[b])
 	}
 	values[conn[0]] = 1
+	src := &values[conn[halfway-1]]
+	o.Observe(src, o.CreateGetfunc(src), func() { obsCount1++ })
+	src = &values[conn[halfway+1]]
+	o.Observe(src, o.CreateGetfunc(src), func() { obsCount2++ })
 	o.Update()
 	for _, v := range values {
 		if v != 1 {
 			t.Errorf("expected 1 not %d", v)
 		}
 	}
-	halfway := len(values) / 2
 	values[conn[halfway]] = 2
 	o.Update()
 
@@ -176,5 +182,7 @@ func TestObseratory6(t *testing.T) {
 			t.Errorf("expected %d not %d", exp, v)
 		}
 	}
-
+	if obsCount1 != 1 || obsCount2 != 2 {
+		t.Errorf("obsCount's are wrong: %d, %d", obsCount1, obsCount2)
+	}
 }

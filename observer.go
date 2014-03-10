@@ -74,16 +74,8 @@ func (o *BasicObservable) NotifyObservers() {
 	}
 }
 
-// Connects a source value with a target value.
-func (o *Observatory) Connect(source, target interface{}) {
-	set, _ := target.(Setable)
-	obs, _ := source.(Observable)
-
-	var (
-		obsfunc Observer
-		get     Getfunc
-	)
-
+// Creates a function that returns the current value of the provided source parameter.
+func (o *Observatory) CreateGetfunc(source interface{}) (get Getfunc) {
 	if sg, ok := source.(Getable); ok {
 		get = sg.Get
 	} else if t := reflect.ValueOf(source); t.Kind() == reflect.Ptr {
@@ -93,6 +85,40 @@ func (o *Observatory) Connect(source, target interface{}) {
 	} else {
 		panic(fmt.Errorf("Can't deal with that non-getable source type: %s", reflect.TypeOf(source)))
 	}
+	return
+}
+
+// Observes a source value for changes, invoking the provided Observer upon changes.
+// If the source is not satisfying the Observable interface, the source will be added
+// to this Observatory's local polling list where it will use "get" and compare the
+// returned value with a stored value copy.
+func (o *Observatory) Observe(source interface{}, get Getfunc, obsfunc Observer) {
+	obs, _ := source.(Observable)
+	if obs == nil {
+		// add to manual poll list instead
+		if o.pollers == nil {
+			o.pollers = make(map[interface{}]poll)
+		}
+		p := o.pollers[source]
+		p.current = get()
+		p.get = get
+
+		p.AddObserver(obsfunc)
+		o.pollers[source] = p
+	} else {
+		obs.AddObserver(obsfunc)
+	}
+}
+
+// Connects a source value with a target value. In other words, if
+// the source value changes, the target will be set to match.
+func (o *Observatory) Connect(source, target interface{}) {
+	set, _ := target.(Setable)
+
+	var (
+		obsfunc Observer
+		get     = o.CreateGetfunc(source)
+	)
 
 	if set != nil {
 		obsfunc = func() {
@@ -158,22 +184,11 @@ func (o *Observatory) Connect(source, target interface{}) {
 	} else {
 		panic(fmt.Errorf("Can't deal with that non-setable target type: %s", reflect.TypeOf(target)))
 	}
-	if obs == nil {
-		// add to manual poll list instead
-		if o.pollers == nil {
-			o.pollers = make(map[interface{}]poll)
-		}
-		p := o.pollers[source]
-		p.current = get()
-		p.get = get
-
-		p.AddObserver(obsfunc)
-		o.pollers[source] = p
-	} else {
-		obs.AddObserver(obsfunc)
-	}
+	o.Observe(source, get, obsfunc)
 }
 
+// Checks all poll sources for changes, and invokes
+// the observers as needed.
 func (o *Observatory) Update() {
 	redo := true
 	const maxLoops = 1000
