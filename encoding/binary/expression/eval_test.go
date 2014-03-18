@@ -10,9 +10,13 @@ import (
 )
 
 func TestEval(t *testing.T) {
+	type s struct {
+		Something int
+	}
 	var str = reflect.ValueOf(struct {
 		Length int
-	}{3})
+		Sub    s
+	}{3, s{10}})
 	var tests = []struct {
 		in  string
 		out int
@@ -30,6 +34,8 @@ func TestEval(t *testing.T) {
 		{"Length < 4", 1},
 		{"Length > 3", 0},
 		{"Length >= 3", 1},
+		{"Sub.Something", 10},
+		{"Sub.Something + Length", 13},
 	}
 
 	for i, test := range tests {

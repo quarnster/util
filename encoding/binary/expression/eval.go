@@ -18,6 +18,22 @@ func Eval(v *reflect.Value, node *parser.Node) (int, error) {
 			return 0, fmt.Errorf("Unexpected child length: %d, %s", l, node)
 		}
 		return Eval(v, node.Children[0])
+	case "DotIdentifier":
+		curr := v.Type().Name()
+		children := node.Children
+		if len(children) > 0 {
+			// The last one will be handled by the fallthrough instead
+			children = node.Children[:len(node.Children)-1]
+		}
+		for _, child := range children {
+			f := v.FieldByName(child.Data())
+			if !f.IsValid() {
+				return 0, fmt.Errorf("No field by name %s in struct %s", node.Data(), curr)
+			}
+			v = &f
+		}
+		node = node.Children[len(node.Children)-1]
+		fallthrough
 	case "Identifier":
 		if f := v.FieldByName(node.Data()); !f.IsValid() {
 			return 0, fmt.Errorf("No field by name %s in struct %s", node.Data(), v)

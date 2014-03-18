@@ -3,7 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 // This file was generated with the following command:
-// ["pegparser", "-peg=encoding/binary/expression/expression.peg", "-notest", "-ignore=Spacing,Primary,Op,Expression,Grouping,BooleanOp", "-testfile=", "-outpath", "encoding/binary/expression/"]
+// ["/Users/quarnster/code/go/bin/pegparser", "-peg=encoding/binary/expression/expression.peg", "-notest", "-ignore=Spacing,Primary,Op,Expression,Grouping,BooleanOp", "-testfile=", "-outpath", "encoding/binary/expression/"]
 
 package expression
 
@@ -62,7 +62,7 @@ func (p *EXPRESSION) realParse() bool {
 	return p.Expression()
 }
 func (p *EXPRESSION) Expression() bool {
-	// Expression  <- (Op / Grouping) EndOfFile
+	// Expression      <-      (Op / Grouping) EndOfFile
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -102,7 +102,7 @@ func (p *EXPRESSION) Expression() bool {
 }
 
 func (p *EXPRESSION) Op() bool {
-	// Op          <- ShiftRight / ShiftLeft / AndNot / Mask / Add / Sub / Mul / BooleanOp
+	// Op              <-      ShiftRight / ShiftLeft / AndNot / Mask / Add / Sub / Mul / BooleanOp
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -146,7 +146,7 @@ func (p *EXPRESSION) Op() bool {
 }
 
 func (p *EXPRESSION) BooleanOp() bool {
-	// BooleanOp   <- Eq / Lt / Gt / Le / Ge
+	// BooleanOp       <-      Eq / Lt / Gt / Le / Ge
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -181,7 +181,7 @@ func (p *EXPRESSION) BooleanOp() bool {
 }
 
 func (p *EXPRESSION) ShiftRight() bool {
-	// ShiftRight  <- Grouping ">>" Grouping
+	// ShiftRight      <-      Grouping ">>" Grouping
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -227,7 +227,7 @@ func (p *EXPRESSION) ShiftRight() bool {
 }
 
 func (p *EXPRESSION) ShiftLeft() bool {
-	// ShiftLeft   <- Grouping "<<" Grouping
+	// ShiftLeft       <-      Grouping "<<" Grouping
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -273,7 +273,7 @@ func (p *EXPRESSION) ShiftLeft() bool {
 }
 
 func (p *EXPRESSION) Mask() bool {
-	// Mask        <- Grouping '&' Grouping
+	// Mask            <-      Grouping '&' Grouping
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -317,7 +317,7 @@ func (p *EXPRESSION) Mask() bool {
 }
 
 func (p *EXPRESSION) Add() bool {
-	// Add         <- Grouping '+' Grouping
+	// Add             <-      Grouping '+' Grouping
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -361,7 +361,7 @@ func (p *EXPRESSION) Add() bool {
 }
 
 func (p *EXPRESSION) Sub() bool {
-	// Sub         <- Grouping '-' Grouping
+	// Sub             <-      Grouping '-' Grouping
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -405,7 +405,7 @@ func (p *EXPRESSION) Sub() bool {
 }
 
 func (p *EXPRESSION) Mul() bool {
-	// Mul         <- Grouping '*' Grouping
+	// Mul             <-      Grouping '*' Grouping
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -449,7 +449,7 @@ func (p *EXPRESSION) Mul() bool {
 }
 
 func (p *EXPRESSION) AndNot() bool {
-	// AndNot      <- Grouping "&^" Grouping
+	// AndNot          <-      Grouping "&^" Grouping
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -495,7 +495,7 @@ func (p *EXPRESSION) AndNot() bool {
 }
 
 func (p *EXPRESSION) Eq() bool {
-	// Eq          <- Grouping "==" Grouping
+	// Eq              <-      Grouping "==" Grouping
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -541,7 +541,7 @@ func (p *EXPRESSION) Eq() bool {
 }
 
 func (p *EXPRESSION) Lt() bool {
-	// Lt          <- Grouping '<' Grouping
+	// Lt              <-      Grouping '<' Grouping
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -585,7 +585,7 @@ func (p *EXPRESSION) Lt() bool {
 }
 
 func (p *EXPRESSION) Le() bool {
-	// Le          <- Grouping "<=" Grouping
+	// Le              <-      Grouping "<=" Grouping
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -631,7 +631,7 @@ func (p *EXPRESSION) Le() bool {
 }
 
 func (p *EXPRESSION) Gt() bool {
-	// Gt          <- Grouping '>' Grouping
+	// Gt              <-      Grouping '>' Grouping
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -675,7 +675,7 @@ func (p *EXPRESSION) Gt() bool {
 }
 
 func (p *EXPRESSION) Ge() bool {
-	// Ge          <- Grouping ">=" Grouping
+	// Ge              <-      Grouping ">=" Grouping
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -721,7 +721,7 @@ func (p *EXPRESSION) Ge() bool {
 }
 
 func (p *EXPRESSION) Grouping() bool {
-	// Grouping    <- Spacing? ('(' Op ')' / Constant / Identifier) Spacing?
+	// Grouping        <-      Spacing? ('(' Op ')' / Constant / DotIdentifier) Spacing?
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -763,7 +763,7 @@ func (p *EXPRESSION) Grouping() bool {
 				if !accept {
 					accept = p.Constant()
 					if !accept {
-						accept = p.Identifier()
+						accept = p.DotIdentifier()
 						if !accept {
 						}
 					}
@@ -795,8 +795,69 @@ func (p *EXPRESSION) Grouping() bool {
 	return accept
 }
 
+func (p *EXPRESSION) DotIdentifier() bool {
+	// DotIdentifier   <-      Identifier ('.' Identifier)*
+	accept := false
+	accept = true
+	start := p.ParserData.Pos()
+	{
+		save := p.ParserData.Pos()
+		accept = p.Identifier()
+		if accept {
+			{
+				accept = true
+				for accept {
+					{
+						save := p.ParserData.Pos()
+						if p.ParserData.Read() != '.' {
+							p.ParserData.UnRead()
+							accept = false
+						} else {
+							accept = true
+						}
+						if accept {
+							accept = p.Identifier()
+							if accept {
+							}
+						}
+						if !accept {
+							if p.LastError < p.ParserData.Pos() {
+								p.LastError = p.ParserData.Pos()
+							}
+							p.ParserData.Seek(save)
+						}
+					}
+				}
+				accept = true
+			}
+			if accept {
+			}
+		}
+		if !accept {
+			if p.LastError < p.ParserData.Pos() {
+				p.LastError = p.ParserData.Pos()
+			}
+			p.ParserData.Seek(save)
+		}
+	}
+	end := p.ParserData.Pos()
+	if accept {
+		node := p.Root.Cleanup(start, end)
+		node.Name = "DotIdentifier"
+		node.P = p
+		node.Range = node.Range.Clip(p.IgnoreRange)
+		p.Root.Append(node)
+	} else {
+		p.Root.Discard(start)
+	}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
+	}
+	return accept
+}
+
 func (p *EXPRESSION) Identifier() bool {
-	// Identifier  <- [A-Z] [_A-Za-z0-9]*
+	// Identifier      <-      [A-Z] [_A-Za-z0-9]*
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -887,7 +948,7 @@ func (p *EXPRESSION) Identifier() bool {
 }
 
 func (p *EXPRESSION) Constant() bool {
-	// Constant    <- ("0x" [a-fA-F0-9]+) / [0-9]+
+	// Constant        <-      ("0x" [a-fA-F0-9]+) / [0-9]+
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -1039,7 +1100,7 @@ func (p *EXPRESSION) Constant() bool {
 }
 
 func (p *EXPRESSION) Spacing() bool {
-	// Spacing     <- [ \t\n\r]+
+	// Spacing         <-      [ \t\n\r]+
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -1081,7 +1142,7 @@ func (p *EXPRESSION) Spacing() bool {
 }
 
 func (p *EXPRESSION) EndOfFile() bool {
-	// EndOfFile   <- !.
+	// EndOfFile       <-      !.
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
