@@ -5,7 +5,6 @@
 package text
 
 import (
-	"sort"
 	"sync"
 )
 
@@ -33,14 +32,16 @@ func (r *RegionSet) Adjust(position, delta int) {
 
 // TODO(q): There should be a on modified callback on the RegionSet
 func (r *RegionSet) flush() {
-	sort.Sort(r)
-	for i := 1; i < len(r.regions); {
-		if r.regions[i-1] == r.regions[i] || r.regions[i-1].Intersects(r.regions[i]) || r.regions[i].Covers(r.regions[i-1]) {
-			r.regions[i-1] = r.regions[i-1].Cover(r.regions[i])
-			copy(r.regions[i:], r.regions[i+1:])
-			r.regions = r.regions[:len(r.regions)-1]
-		} else {
-			i++
+	for i := 0; i < len(r.regions); i++ {
+		for j := i + 1; j < len(r.regions); {
+			if r.regions[i] == r.regions[j] || r.regions[i].Intersects(r.regions[j]) || r.regions[j].Covers(r.regions[i]) {
+				r.regions[i] = r.regions[i].Cover(r.regions[j])
+				copy(r.regions[j:], r.regions[j + 1:])
+				r.regions = r.regions[:len(r.regions) - 1]
+				j = i + 1
+			} else {
+				j++
+			}
 		}
 	}
 }

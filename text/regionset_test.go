@@ -61,12 +61,12 @@ func TestRegionSetflush(t *testing.T) {
 		t.Errorf("Not as expected: %v", r)
 	}
 	r.Add(Region{5, 10})
-	if !reflect.DeepEqual(r.regions, []Region{{5, 10}, {10, 23}}) {
+	if !reflect.DeepEqual(r.regions, []Region{{10, 23}, {5, 10}}) {
 		t.Errorf("Not as expected: %v", r)
 	}
 
 	r.Add(Region{2, 6})
-	if !reflect.DeepEqual(r.regions, []Region{{2, 10}, {10, 23}}) {
+	if !reflect.DeepEqual(r.regions, []Region{{10, 23}, {2, 10}}) {
 		t.Errorf("Not as expected: %v", r)
 	}
 	r.Clear()
@@ -118,7 +118,7 @@ func TestRegionSetAdd(t *testing.T) {
 		B   Region
 		Out []Region
 	}{
-		{[]Region{{10, 20}}, Region{0, 5}, []Region{{0, 5}, {10, 20}}},
+		{[]Region{{10, 20}}, Region{0, 5}, []Region{{10, 20}, {0, 5}}},
 		{[]Region{{10, 20}}, Region{12, 15}, []Region{{10, 20}}},
 		{[]Region{{10, 20}}, Region{5, 15}, []Region{{5, 20}}},
 		{[]Region{{10, 20}}, Region{15, 25}, []Region{{10, 25}}},
@@ -131,6 +131,29 @@ func TestRegionSetAdd(t *testing.T) {
 		v.Add(test.B)
 		if !reflect.DeepEqual(v.Regions(), test.Out) {
 			t.Errorf("Test %d; Expected %v, got: %v", i, test.Out, v.Regions())
+		}
+	}
+}
+
+func TestRegionSetAddAll(t *testing.T) {
+	tests := []struct {
+		in  []Region
+		exp []Region
+	}{
+		{
+			[]Region{{5, 15}, {0, 20}, {100, 90}, {10, 25}, {45, 30}},
+			[]Region{{0, 25}, {100, 90}, {45, 30}},
+		},
+		{
+			[]Region{{100, 50}, {20, 5}, {0, 10}, {30, 40}, {15, 25}},
+			[]Region{{100, 50}, {25, 0}, {30, 40}},
+		},
+	}
+	for i, test := range tests {
+		var v RegionSet
+		v.AddAll(test.in)
+		if !reflect.DeepEqual(v.Regions(), test.exp) {
+			t.Errorf("Test %d; Expected %v, got: %v", i, test.exp, v.Regions())
 		}
 	}
 }
