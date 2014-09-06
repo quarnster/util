@@ -33,7 +33,7 @@ type (
 		Len() int
 	}
 	IntArray struct {
-		model []int
+		BasicArray
 	}
 	BasicArray struct {
 		model []interface{}
@@ -90,29 +90,11 @@ func (b *BoundsCheckingArray) Get(index int) interface{} {
 }
 
 func (i *IntArray) Insert(index int, data interface{}) error {
-	ii, ok := data.(int)
+	_, ok := data.(int)
 	if !ok {
 		return ErrNotInt
 	}
-	nmodel := make([]int, len(i.model)+1)
-	copy(nmodel, i.model[:index])
-	nmodel[index] = ii
-	copy(nmodel[index+1:], i.model[index:])
-	return nil
-}
-
-func (i *IntArray) Remove(index int) (olddata interface{}, err error) {
-	olddata = i.model[index]
-	copy(i.model[index:], i.model[index+1:])
-	return olddata, nil
-}
-
-func (i *IntArray) Get(index int) interface{} {
-	return i.model[index]
-}
-
-func (i *IntArray) Len() int {
-	return len(i.model)
+	return i.BasicArray.Insert(index, data)
 }
 
 func (a *BasicArray) Insert(index int, data interface{}) error {
