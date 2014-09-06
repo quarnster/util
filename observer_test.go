@@ -160,9 +160,9 @@ func TestObseratory6(t *testing.T) {
 	}
 	values[conn[0]] = 1
 	src := &values[conn[halfway-1]]
-	o.Observe(src, o.CreateGetfunc(src), func() { obsCount1++ })
+	o.Observe(src, o.CreateGetfunc(src), funcObserver{func() { obsCount1++ }})
 	src = &values[conn[halfway+1]]
-	o.Observe(src, o.CreateGetfunc(src), func() { obsCount2++ })
+	o.Observe(src, o.CreateGetfunc(src), funcObserver{func() { obsCount2++ }})
 	o.Update()
 	for _, v := range values {
 		if v != 1 {

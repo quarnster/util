@@ -23,7 +23,9 @@ type (
 		Set(v interface{})
 	}
 	// Classic observer callback
-	Observer func()
+	Observer interface {
+		Changed(data interface{})
+	}
 
 	// A type that is observable keeps its own list of
 	// active observers which should be notified upon
@@ -31,7 +33,7 @@ type (
 	Observable interface {
 		AddObserver(Observer)
 		RemoveObserver(Observer)
-		NotifyObservers()
+		NotifyObservers(data interface{})
 	}
 
 	// BasicObservable implements the Observable interface,
@@ -62,15 +64,22 @@ type (
 	Observatory struct {
 		pollers map[interface{}]poll
 	}
+
+	funcObserver struct {
+		obs func()
+	}
 )
 
+func (o funcObserver) Changed(data interface{}) {
+	o.obs()
+}
 func (o *BasicObservable) AddObserver(obs Observer) {
 	o.observers = append(o.observers, obs)
 }
 
-func (o *BasicObservable) NotifyObservers() {
+func (o *BasicObservable) NotifyObservers(data interface{}) {
 	for _, obs := range o.observers {
-		obs()
+		obs.Changed(data)
 	}
 }
 
@@ -94,20 +103,20 @@ func (o *Observatory) CreateGetfunc(source interface{}) (get Getfunc) {
 // returned value with a stored value copy.
 func (o *Observatory) Observe(source interface{}, get Getfunc, obsfunc Observer) {
 	obs, _ := source.(Observable)
-	if obs == nil {
-		// add to manual poll list instead
-		if o.pollers == nil {
-			o.pollers = make(map[interface{}]poll)
-		}
-		p := o.pollers[source]
-		p.current = get()
-		p.get = get
-
-		p.AddObserver(obsfunc)
-		o.pollers[source] = p
-	} else {
+	if obs != nil {
 		obs.AddObserver(obsfunc)
+		return
 	}
+	// add to manual poll list instead
+	if o.pollers == nil {
+		o.pollers = make(map[interface{}]poll)
+	}
+	p := o.pollers[source]
+	p.current = get()
+	p.get = get
+
+	p.AddObserver(obsfunc)
+	o.pollers[source] = p
 }
 
 // Connects a source value with a target value. In other words, if
@@ -116,7 +125,7 @@ func (o *Observatory) Connect(source, target interface{}) {
 	set, _ := target.(Setable)
 
 	var (
-		obsfunc Observer
+		obsfunc func()
 		get     = o.CreateGetfunc(source)
 	)
 
@@ -184,7 +193,7 @@ func (o *Observatory) Connect(source, target interface{}) {
 	} else {
 		panic(fmt.Errorf("Can't deal with that non-setable target type: %s", reflect.TypeOf(target)))
 	}
-	o.Observe(source, get, obsfunc)
+	o.Observe(source, get, funcObserver{obsfunc})
 }
 
 // Checks all poll sources for changes, and invokes
@@ -195,12 +204,14 @@ func (o *Observatory) Update() {
 	for i := 0; i < maxLoops && redo; i++ {
 		redo = false
 		for k, p := range o.pollers {
-			if nv := p.get(); nv != p.current {
-				p.current = nv
-				o.pollers[k] = p
-				p.NotifyObservers()
-				redo = true
+			nv := p.get()
+			if nv == p.current {
+				continue
 			}
+			p.current = nv
+			o.pollers[k] = p
+			p.NotifyObservers(nil)
+			redo = true
 		}
 	}
 }
