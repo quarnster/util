@@ -11,8 +11,9 @@ import (
 )
 
 var (
-	ErrNotInt   = fmt.Errorf("Attempting to insert a non-int type")
-	ErrIndexOOB = fmt.Errorf("Index is out of bounds")
+	ErrNotInt           = fmt.Errorf("Attempting to insert a non-int type")
+	ErrIndexOOB         = fmt.Errorf("Index is out of bounds")
+	ErrNotManipulatable = fmt.Errorf("Filtered arrays are not directly manipulatable")
 )
 
 type (
@@ -44,12 +45,27 @@ type (
 		util.BasicObservable
 		Array
 	}
-	FilteredArray struct {
+	Acceptable    func(data interface{}) bool
+	filteredArray struct {
 		indices IntArray
-		accept  func(data interface{}) bool
+		accept  Acceptable
 		Array
 	}
 )
+
+func NewFilteredArray(inner Array, accept Acceptable) Array {
+	if _, ok := inner.(util.Observable); !ok {
+		inner = &ObservableArray{Array: inner}
+	}
+	fa := filteredArray{accept: accept, Array: inner}
+	for i := 0; i < inner.Len(); i++ {
+		if !accept(inner.Get(i)) {
+			continue
+		}
+		fa.indices.Insert(fa.indices.Len(), i)
+	}
+	return &fa
+}
 
 func (b *BoundsCheckingArray) Insert(index int, data interface{}) error {
 	if index < 0 || index > b.Len() {
@@ -136,7 +152,7 @@ func (a *ObservableArray) Remove(i int) (olddata interface{}, err error) {
 	return
 }
 
-func (fa *FilteredArray) Changed(data interface{}) {
+func (fa *filteredArray) Changed(data interface{}) {
 	switch d := data.(type) {
 	case RemovedData:
 		for i, k := range fa.indices.model {
@@ -155,4 +171,19 @@ func (fa *FilteredArray) Changed(data interface{}) {
 		})
 		fa.indices.Insert(idx+1, data)
 	}
+}
+
+func (fa *filteredArray) Insert(index int, data interface{}) error {
+	return ErrNotManipulatable
+}
+
+func (fa *filteredArray) Remove(index int) (interface{}, error) {
+	return nil, ErrNotManipulatable
+}
+
+func (fa *filteredArray) Get(index int) interface{} {
+	return fa.Array.Get(fa.indices.Get(index).(int))
+}
+func (fa *filteredArray) Len() int {
+	return fa.indices.Len()
 }
