@@ -58,6 +58,7 @@ func NewFilteredArray(inner Array, accept Acceptable) Array {
 		inner = &ObservableArray{Array: inner}
 	}
 	fa := filteredArray{accept: accept, Array: inner}
+	inner.(util.Observable).AddObserver(&fa)
 	for i := 0; i < inner.Len(); i++ {
 		if !accept(inner.Get(i)) {
 			continue
