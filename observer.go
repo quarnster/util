@@ -77,6 +77,16 @@ func (o *BasicObservable) AddObserver(obs Observer) {
 	o.observers = append(o.observers, obs)
 }
 
+func (o *BasicObservable) RemoveObserver(obs Observer) {
+	for i, v := range o.observers {
+		if v == obs {
+			copy(o.observers[i:], o.observers[i+1:])
+			o.observers = o.observers[:len(o.observers)-1]
+			return
+		}
+	}
+}
+
 func (o *BasicObservable) NotifyObservers(data interface{}) {
 	for _, obs := range o.observers {
 		obs.Changed(data)
