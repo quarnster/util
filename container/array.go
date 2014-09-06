@@ -170,7 +170,7 @@ func (fa *filteredArray) Changed(data interface{}) {
 		idx := sort.Search(fa.indices.Len(), func(i int) bool {
 			return fa.Get(i).(int) < d.Index
 		})
-		fa.indices.Insert(idx+1, data)
+		fa.indices.Insert(idx+1, d.Index)
 	}
 }
 
