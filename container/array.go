@@ -4,7 +4,16 @@
 
 package container
 
-import "github.com/quarnster/util"
+import (
+	"fmt"
+	"github.com/quarnster/util"
+	"sort"
+)
+
+var (
+	ErrNotInt   = fmt.Errorf("Attempting to insert a non-int type")
+	ErrIndexOOB = fmt.Errorf("Index is out of bounds")
+)
 
 type (
 	RemovedData struct {
@@ -22,22 +31,74 @@ type (
 		Get(index int) interface{}
 		Len() int
 	}
+	IntArray struct {
+		model []int
+	}
 	BasicArray struct {
 		model []interface{}
+	}
+	BoundsCheckingArray struct {
+		Array
 	}
 	ObservableArray struct {
 		util.BasicObservable
 		Array
 	}
+	FilteredArray struct {
+		indices IntArray
+		accept  func(data interface{}) bool
+		Array
+	}
 )
 
-func (a *BasicArray) Insert(index int, data interface{}) error {
-	if index < 0 {
-		index = 0
-	} else if index > len(a.model) {
-		index = len(a.model)
+func (b *BoundsCheckingArray) Insert(index int, data interface{}) error {
+	if index < 0 || index > b.Len() {
+		return ErrIndexOOB
 	}
+	return b.Array.Insert(index, data)
+}
 
+func (b *BoundsCheckingArray) Remove(index int) (interface{}, error) {
+	if index < 0 || index >= b.Len() {
+		return nil, ErrIndexOOB
+	}
+	return b.Array.Remove(index)
+}
+
+func (b *BoundsCheckingArray) Get(index int) interface{} {
+	if index < 0 || index >= b.Len() {
+		return nil
+	}
+	return b.Array.Get(index)
+}
+
+func (i *IntArray) Insert(index int, data interface{}) error {
+	ii, ok := data.(int)
+	if !ok {
+		return ErrNotInt
+	}
+	nmodel := make([]int, len(i.model)+1)
+	copy(nmodel, i.model[:index])
+	nmodel[index] = ii
+	copy(nmodel[index+1:], i.model[index:])
+	return nil
+}
+
+func (i *IntArray) Remove(index int) (olddata interface{}, err error) {
+	olddata = i.model[index]
+	copy(i.model[index:], i.model[index+1:])
+	return olddata, nil
+}
+
+func (i *IntArray) Get(index int) interface{} {
+	return i.model[index]
+}
+
+func (i *IntArray) Len() int {
+	return len(i.model)
+}
+
+func (a *BasicArray) Insert(index int, data interface{}) error {
 	nmodel := make([]interface{}, len(a.model)+1)
 	copy(nmodel, a.model[:index])
 	nmodel[index] = data
@@ -46,12 +107,6 @@ func (a *BasicArray) Insert(index int, data interface{}) error {
 }
 
 func (a *BasicArray) Remove(i int) (olddata interface{}, err error) {
-	if i < 0 {
-		i = 0
-	} else if i >= len(a.model)-1 {
-		i = len(a.model) - 1
-	}
-
 	olddata = a.model[i]
 	copy(a.model[i:], a.model[i+1:])
 	return olddata, nil
@@ -79,4 +134,25 @@ func (a *ObservableArray) Remove(i int) (olddata interface{}, err error) {
 	}
 	a.NotifyObservers(RemovedData{i, olddata})
 	return
+}
+
+func (fa *FilteredArray) Changed(data interface{}) {
+	switch d := data.(type) {
+	case RemovedData:
+		for i, k := range fa.indices.model {
+			if k == d.Index {
+				fa.indices.Remove(i)
+				break
+			}
+		}
+	case InsertedData:
+		data := fa.Get(d.Index)
+		if !fa.accept(data) {
+			return
+		}
+		idx := sort.Search(fa.indices.Len(), func(i int) bool {
+			return fa.Get(i).(int) < d.Index
+		})
+		fa.indices.Insert(idx+1, data)
+	}
 }
