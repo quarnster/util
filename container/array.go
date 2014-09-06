@@ -14,6 +14,7 @@ var (
 	ErrNotInt           = fmt.Errorf("Attempting to insert a non-int type")
 	ErrIndexOOB         = fmt.Errorf("Index is out of bounds")
 	ErrNotManipulatable = fmt.Errorf("Filtered arrays are not directly manipulatable")
+	ErrMustBeObservable = fmt.Errorf("The inner array must satisfy the Observable interface. Consider wrapping it with the ObservableArray type.")
 )
 
 type (
@@ -53,9 +54,9 @@ type (
 	}
 )
 
-func NewFilteredArray(inner Array, accept Acceptable) Array {
+func NewFilteredArray(inner Array, accept Acceptable) (Array, error) {
 	if _, ok := inner.(util.Observable); !ok {
-		inner = &ObservableArray{Array: inner}
+		return nil, ErrMustBeObservable
 	}
 	fa := filteredArray{accept: accept, Array: inner}
 	inner.(util.Observable).AddObserver(&fa)
@@ -65,7 +66,7 @@ func NewFilteredArray(inner Array, accept Acceptable) Array {
 		}
 		fa.indices.Insert(fa.indices.Len(), i)
 	}
-	return &fa
+	return &fa, nil
 }
 
 func (b *BoundsCheckingArray) Insert(index int, data interface{}) error {
@@ -102,12 +103,14 @@ func (a *BasicArray) Insert(index int, data interface{}) error {
 	copy(nmodel, a.model[:index])
 	nmodel[index] = data
 	copy(nmodel[index+1:], a.model[index:])
+	a.model = nmodel
 	return nil
 }
 
 func (a *BasicArray) Remove(i int) (olddata interface{}, err error) {
 	olddata = a.model[i]
 	copy(a.model[i:], a.model[i+1:])
+	a.model = a.model[:len(a.model)-1]
 	return olddata, nil
 }
 
@@ -138,21 +141,29 @@ func (a *ObservableArray) Remove(i int) (olddata interface{}, err error) {
 func (fa *filteredArray) Changed(data interface{}) {
 	switch d := data.(type) {
 	case RemovedData:
-		for i, k := range fa.indices.model {
-			if k == d.Index {
-				fa.indices.Remove(i)
-				break
+		for idx := 0; idx < fa.indices.Len(); {
+			curr := fa.indices.Get(idx).(int)
+			if curr == d.Index {
+				fa.indices.Remove(idx)
+				continue
 			}
+			if curr > d.Index {
+				fa.indices.model[idx] = curr - 1
+			}
+			idx++
 		}
 	case InsertedData:
-		data := fa.Get(d.Index)
+		data := fa.Array.Get(d.Index)
 		if !fa.accept(data) {
 			return
 		}
 		idx := sort.Search(fa.indices.Len(), func(i int) bool {
-			return fa.Get(i).(int) < d.Index
+			return fa.indices.Get(i).(int) <= d.Index
 		})
-		fa.indices.Insert(idx+1, d.Index)
+		if idx < fa.Len() {
+			idx++
+		}
+		fa.indices.Insert(idx, d.Index)
 	}
 }
 
