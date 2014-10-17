@@ -3,13 +3,13 @@
 // BSD-style license that can be found in the LICENSE file.
 
 // This file was generated with the following command:
-// ["/Users/quarnster/code/go/bin/pegparser", "-peg=encoding/binary/expression/expression.peg", "-notest", "-ignore=Spacing,Primary,Op,Expression,Grouping,BooleanOp", "-testfile=", "-outpath", "encoding/binary/expression/"]
+// ["/Users/quarnster/code/go/bin/pegparser", "-peg=encoding/binary/expression/expression.peg", "-notest", "-ignore=Spacing,Primary,Op,Expression,Grouping,BooleanOp", "-testfile=", "-outpath", "encoding/binary/expression/", "-generator=go"]
 
 package expression
 
 import (
+	"github.com/limetext/text"
 	. "github.com/quarnster/parser"
-	"github.com/quarnster/util/text"
 )
 
 type EXPRESSION struct {
