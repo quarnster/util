@@ -146,7 +146,7 @@ func (p *EXPRESSION) Op() bool {
 }
 
 func (p *EXPRESSION) BooleanOp() bool {
-	// BooleanOp       <-      Eq / Lt / Gt / Le / Ge
+	// BooleanOp       <-      Eq / Lt / Gt / Le / Ge / Ne
 	accept := false
 	accept = true
 	start := p.ParserData.Pos()
@@ -162,6 +162,9 @@ func (p *EXPRESSION) BooleanOp() bool {
 					if !accept {
 						accept = p.Ge()
 						if !accept {
+							accept = p.Ne()
+							if !accept {
+							}
 						}
 					}
 				}
@@ -528,6 +531,52 @@ func (p *EXPRESSION) Eq() bool {
 	if accept {
 		node := p.Root.Cleanup(start, end)
 		node.Name = "Eq"
+		node.P = p
+		node.Range = node.Range.Clip(p.IgnoreRange)
+		p.Root.Append(node)
+	} else {
+		p.Root.Discard(start)
+	}
+	if p.IgnoreRange.A >= end || p.IgnoreRange.B <= start {
+		p.IgnoreRange = text.Region{}
+	}
+	return accept
+}
+
+func (p *EXPRESSION) Ne() bool {
+	// Ne              <-      Grouping "!=" Grouping
+	accept := false
+	accept = true
+	start := p.ParserData.Pos()
+	{
+		save := p.ParserData.Pos()
+		accept = p.Grouping()
+		if accept {
+			{
+				accept = true
+				s := p.ParserData.Pos()
+				if p.ParserData.Read() != '!' || p.ParserData.Read() != '=' {
+					p.ParserData.Seek(s)
+					accept = false
+				}
+			}
+			if accept {
+				accept = p.Grouping()
+				if accept {
+				}
+			}
+		}
+		if !accept {
+			if p.LastError < p.ParserData.Pos() {
+				p.LastError = p.ParserData.Pos()
+			}
+			p.ParserData.Seek(save)
+		}
+	}
+	end := p.ParserData.Pos()
+	if accept {
+		node := p.Root.Cleanup(start, end)
+		node.Name = "Ne"
 		node.P = p
 		node.Range = node.Range.Clip(p.IgnoreRange)
 		p.Root.Append(node)

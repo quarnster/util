@@ -62,6 +62,12 @@ func Eval(v *reflect.Value, node *parser.Node) (int, error) {
 			return 0, err
 		} else {
 			switch node.Name {
+			case "Ne":
+				if a != b {
+					return 1, nil
+				} else {
+					return 0, nil
+				}
 			case "Eq":
 				if a == b {
 					return 1, nil

@@ -1,6 +1,6 @@
 Expression      <-      (Op / Grouping) EndOfFile
 Op              <-      ShiftRight / ShiftLeft / AndNot / Mask / Add / Sub / Mul / BooleanOp
-BooleanOp       <-      Eq / Lt / Gt / Le / Ge
+BooleanOp       <-      Eq / Lt / Gt / Le / Ge / Ne
 ShiftRight      <-      Grouping ">>" Grouping
 ShiftLeft       <-      Grouping "<<" Grouping
 Mask            <-      Grouping '&' Grouping
@@ -9,6 +9,7 @@ Sub             <-      Grouping '-' Grouping
 Mul             <-      Grouping '*' Grouping
 AndNot          <-      Grouping "&^" Grouping
 Eq              <-      Grouping "==" Grouping
+Ne              <-      Grouping "!=" Grouping
 Lt              <-      Grouping '<' Grouping
 Le              <-      Grouping "<=" Grouping
 Gt              <-      Grouping '>' Grouping
