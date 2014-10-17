@@ -219,7 +219,7 @@ func (r *BinaryReader) ReadInterface(v interface{}) error {
 					} else {
 						size = int(s)
 					}
-				case "uin64":
+				case "uint64":
 					if s, err := r.Uint64(); err != nil {
 						return err
 					} else {
