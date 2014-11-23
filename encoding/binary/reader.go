@@ -48,6 +48,7 @@ type (
 	BinaryReader struct {
 		Reader    io.ReadSeeker
 		Endianess sb.ByteOrder
+		br        BitReader
 	}
 )
 
@@ -197,6 +198,32 @@ func (r *BinaryReader) ReadInterface(v interface{}) error {
 				} else if _, err := r.Seek(int64(ev), 1); err != nil {
 					return err
 				}
+			}
+
+			if l := f2.Tag.Get("bits"); l != "" {
+				var e expression.EXPRESSION
+				if r.br.Inner == nil {
+					r.br.Inner = r.Reader
+				}
+				if !e.Parse(l) {
+					return e.Error()
+				} else if ev, err := expression.Eval(&v2, e.RootNode()); err != nil {
+					return err
+				} else if bits, err := r.br.ReadBits(ev); err != nil {
+					return err
+				} else {
+					switch f.Kind() {
+					case reflect.Bool:
+						f.SetBool(bits != 0)
+					case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+						f.SetUint(uint64(bits))
+					case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+						f.SetInt(int64(bits))
+					default:
+						return fmt.Errorf("Don't know how to set bits of type: %s", f.Kind())
+					}
+				}
+				continue
 			}
 
 			if l := f2.Tag.Get("length"); l != "" {

@@ -43,6 +43,12 @@ func Eval(v *reflect.Value, node *parser.Node) (int, error) {
 				return int(f.Uint()), nil
 			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 				return int(f.Int()), nil
+			case reflect.Bool:
+				if f.Bool() {
+					return 1, nil
+				} else {
+					return 0, nil
+				}
 			default:
 				return 0, fmt.Errorf("Unexpected identifier kind: %v %v", f, f.Kind())
 			}

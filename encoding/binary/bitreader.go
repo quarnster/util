@@ -1,6 +1,9 @@
 package binary
 
-import "io"
+import (
+	"fmt"
+	"io"
+)
 
 type BitReader struct {
 	Inner    io.Reader
@@ -23,4 +26,19 @@ func (b *BitReader) ReadBit() (bool, error) {
 	b.currPos--
 	r := (b.currByte & (1 << b.currPos)) != 0
 	return r, nil
+}
+
+func (b *BitReader) ReadBits(count int) (int64, error) {
+	if count > 64 || count < 0 {
+		return 0, fmt.Errorf("count out of range: %d", count)
+	}
+	var ret int64
+	for ; count > 0; count-- {
+		if bi, err := b.ReadBit(); err != nil {
+			return 0, err
+		} else if bi {
+			ret |= 1 << uint64(count-1)
+		}
+	}
+	return ret, nil
 }

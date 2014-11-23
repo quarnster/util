@@ -2,8 +2,7 @@
 // Use of this source code is governed by a 2-clause
 // BSD-style license that can be found in the LICENSE file.
 
-// This file was generated with the following command:
-// ["/Users/quarnster/code/go/bin/pegparser", "-peg=encoding/binary/expression/expression.peg", "-notest", "-ignore=Spacing,Primary,Op,Expression,Grouping,BooleanOp", "-testfile=", "-outpath", "encoding/binary/expression/", "-generator=go"]
+//go:generate "pegparser" "-peg=expression.peg" "-notest" "-ignore=Spacing,Primary,Op,Expression,Grouping,BooleanOp" "-testfile=\"\"" "-outpath=." "-generator=go" "-header=// Copyright 2013 Fredrik Ehnbom\n// Use of this source code is governed by a 2-clause\n// BSD-style license that can be found in the LICENSE file.\n\n" "-gogenerate"
 
 package expression
 

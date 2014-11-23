@@ -28,3 +28,16 @@ func TestBitReader(t *testing.T) {
 	}
 
 }
+
+func TestBitReaderBits(t *testing.T) {
+	buf := bytes.NewReader([]byte{9, 129, 128 + 32})
+	exp := int64((9 << 11) | (129 << 3) | 5)
+
+	br := binary.BitReader{Inner: buf}
+	i, err := br.ReadBits(19)
+	if err != nil {
+		t.Error(err)
+	} else if i != exp {
+		t.Errorf("Expected %v, but got %v", exp, i)
+	}
+}
